@@ -59,11 +59,6 @@ function plugin_serialsearch_init(): void {
 
     // Inject CSS
     $PLUGIN_HOOKS['add_css']['serialsearch'] = 'plugin_serialsearch_add_css';
-    // TEMPORARY DEBUG — remove after confirming JS loads
-    if (defined('GLPI_ROOT') && !defined('GLPI_CLI')) {
-        echo "<script src='/glpi/plugins/serialsearch/js/serialsearch.js'></script>";
-        echo "<script>console.log('SerialSearch: script tag injected directly')</script>";
-    }
 }
 
 /**
@@ -80,4 +75,11 @@ function plugin_serialsearch_add_javascript(): void {
 function plugin_serialsearch_add_css(): void {
     $root = Plugin::getWebDir('serialsearch');
     echo "<link rel='stylesheet' href='{$root}/css/serialsearch.css?v=" . PLUGIN_SERIALSEARCH_VERSION . "'>\n";
+}
+
+
+// TEMPORARY DEBUG — remove after confirming JS loads
+if (defined('GLPI_ROOT') && !defined('GLPI_CLI')) {
+    echo "<script src='/glpi/plugins/serialsearch/js/serialsearch.js'></script>";
+    echo "<script>console.log('SerialSearch: script tag injected directly')</script>";
 }
