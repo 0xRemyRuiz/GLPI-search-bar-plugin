@@ -7,7 +7,7 @@
 
 define('PLUGIN_SERIALSEARCH_VERSION', '1.0.0');
 define('PLUGIN_SERIALSEARCH_MIN_GLPI', '10.0.0');
-define('PLUGIN_SERIALSEARCH_MAX_GLPI', '11.99.99');
+// define('PLUGIN_SERIALSEARCH_MAX_GLPI', '11.99.99');
 
 /**
  * Plugin version information
@@ -22,7 +22,7 @@ function plugin_version_serialsearch(): array {
         'requirements' => [
             'glpi' => [
                 'min' => PLUGIN_SERIALSEARCH_MIN_GLPI,
-                'max' => PLUGIN_SERIALSEARCH_MAX_GLPI,
+                // 'max' => PLUGIN_SERIALSEARCH_MAX_GLPI,
             ]
         ]
     ];
