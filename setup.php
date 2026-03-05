@@ -8,8 +8,7 @@
 define('PLUGIN_SERIALSEARCH_VERSION', '1.0.0');
 define('PLUGIN_SERIALSEARCH_MIN_GLPI', '10.0.0');
 // define('PLUGIN_SERIALSEARCH_MAX_GLPI', '11.99.99');
-
-$root = Plugin::getWebDir('serialsearch');
+define('SERIALSEARCH_ROOT', Plugin::getWebDir('serialsearch'));
 
 
 /**
@@ -58,30 +57,25 @@ function plugin_serialsearch_init(): void {
     $PLUGIN_HOOKS['csrf_compliant']['serialsearch'] = true;
 
     // Inject JS on every page (will self-activate only on ticket forms)
-    $PLUGIN_HOOKS['add_javascript']['serialsearch'] = 'plugin_serialsearch_add_javascript';
+    // $PLUGIN_HOOKS['add_javascript']['serialsearch'] = 'plugin_serialsearch_add_javascript';
+    $PLUGIN_HOOKS['add_javascript']['serialsearch'] = ['js/serialsearch.js'];
 
     // Inject CSS
-    $PLUGIN_HOOKS['add_css']['serialsearch'] = 'plugin_serialsearch_add_css';
+    // $PLUGIN_HOOKS['add_css']['serialsearch'] = 'plugin_serialsearch_add_css';
+    $PLUGIN_HOOKS['add_css']['serialsearch'] = ['css/serialsearch.css'];
 }
 
 /**
  * Output the JS include tag
  */
-function plugin_serialsearch_add_javascript(): void {
-    $root = Plugin::getWebDir('serialsearch');
-    echo "<script src='{$root}/js/serialsearch.js?v=" . PLUGIN_SERIALSEARCH_VERSION . "'></script>\n";
-}
+// function plugin_serialsearch_add_javascript(): void {
+//     echo "<script src='" . SERIALSEARCH_ROOT ."/js/serialsearch.js?v=" . PLUGIN_SERIALSEARCH_VERSION . "'></script>\n";
+// }
 
 /**
  * Output the CSS include tag
  */
-function plugin_serialsearch_add_css(): void {
-    echo "<link rel='stylesheet' href='{$root}/css/serialsearch.css?v=" . PLUGIN_SERIALSEARCH_VERSION . "'>\n";
-}
+// function plugin_serialsearch_add_css(): void {
+//     echo "<link rel='stylesheet' href='" . SERIALSEARCH_ROOT . "/css/serialsearch.css?v=" . PLUGIN_SERIALSEARCH_VERSION . "'>\n";
+// }
 
-
-// TEMPORARY DEBUG — remove after confirming JS loads
-if (defined('GLPI_ROOT') && !defined('GLPI_CLI')) {
-    echo "<script src='{$root}/js/serialsearch.js'></script>";
-    echo "<script>console.log('SerialSearch: script tag injected directly')</script>";
-}
