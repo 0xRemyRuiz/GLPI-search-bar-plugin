@@ -1,276 +1,264 @@
-/* ============================================================
+/* =====================================================
    Serial Search Plugin — serialsearch.css
-   A clean, utilitarian style that blends with GLPI's v10 UI
-   ============================================================ */
+   Blends with GLPI's default theme (light + dark).
+   ===================================================== */
 
 :root {
-  --ss-accent:      #2d6cdf;
-  --ss-accent-dark: #1a50b8;
-  --ss-bg:          #ffffff;
-  --ss-border:      #d0d7e2;
-  --ss-shadow:      0 4px 16px rgba(0,0,0,.10);
-  --ss-hover:       #f0f4fb;
-  --ss-text:        #1a202c;
-  --ss-muted:       #64748b;
-  --ss-mark:        #fde68a;
-  --ss-radius:      8px;
-  --ss-font:        'Inter', 'Segoe UI', system-ui, sans-serif;
+    --ss-accent:   #2563eb;
+    --ss-bg:       #ffffff;
+    --ss-border:   #cbd5e1;
+    --ss-hover:    #eff6ff;
+    --ss-text:     #0f172a;
+    --ss-muted:    #64748b;
+    --ss-mark:     #fde68a;
+    --ss-ok-bg:    #f0fdf4;
+    --ss-ok-border:#86efac;
+    --ss-warn-bg:  #fff7ed;
+    --ss-warn-border:#fdba74;
+    --ss-radius:   8px;
+    --ss-shadow:   0 4px 20px rgba(0,0,0,.10);
 }
 
-/* ── Container ────────────────────────────────────────────── */
+/* Dark mode — GLPI 11 uses data-glpi-theme-dark="1" */
+[data-glpi-theme-dark="1"] {
+    --ss-bg:       #1e293b;
+    --ss-border:   #334155;
+    --ss-hover:    #1e3a5f;
+    --ss-text:     #f1f5f9;
+    --ss-muted:    #94a3b8;
+}
 
-#ss-container {
-  margin: 10px 0 14px 0;
-  font-family: var(--ss-font);
+/* ── Wrapper ─────────────────────────────────────── */
+
+#ss-wrapper {
+    margin: 8px 0 12px;
+    font-family: inherit;
 }
 
 #ss-bar {
-  position: relative;
-  max-width: 560px;
+    position: relative;
+    max-width: 520px;
 }
 
-/* ── Input row ───────────────────────────────────────────── */
+/* ── Input row ───────────────────────────────────── */
 
-#ss-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border: 1.5px solid var(--ss-border);
-  border-radius: var(--ss-radius);
-  background: var(--ss-bg);
-  padding: 0 10px;
-  transition: border-color .18s, box-shadow .18s;
+#ss-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: var(--ss-bg);
+    border: 1.5px solid var(--ss-border);
+    border-radius: var(--ss-radius);
+    transition: border-color .15s, box-shadow .15s;
 }
 
-#ss-input-wrap:focus-within {
-  border-color: var(--ss-accent);
-  box-shadow: 0 0 0 3px rgba(45,108,223,.15);
+#ss-row:focus-within {
+    border-color: var(--ss-accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
 }
 
-#ss-icon {
-  font-size: 18px;
-  color: var(--ss-muted);
-  pointer-events: none;
-  line-height: 1;
+#ss-magnifier {
+    font-size: 18px;
+    color: var(--ss-muted);
+    pointer-events: none;
+    line-height: 1;
+    flex-shrink: 0;
 }
 
 #ss-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 9px 0;
-  font-size: 14px;
-  color: var(--ss-text);
-  background: transparent;
-  font-family: var(--ss-font);
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 9px 0;
+    font-size: 13.5px;
+    background: transparent;
+    color: var(--ss-text);
+    font-family: inherit;
+    min-width: 0;
 }
 
 #ss-input::placeholder {
-  color: #a0aec0;
-}
-
-#ss-type-filter {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 13px;
-  color: var(--ss-muted);
-  cursor: pointer;
-  font-family: var(--ss-font);
-  padding: 2px 0;
-}
-
-#ss-spinner {
-  font-size: 16px;
-  color: var(--ss-accent);
-  animation: ss-spin .7s linear infinite;
+    color: #a0aec0;
 }
 
 #ss-clear {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--ss-muted);
-  font-size: 13px;
-  padding: 0 2px;
-  line-height: 1;
-  transition: color .15s;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ss-muted);
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color .15s, background .15s;
+}
+#ss-clear:hover {
+    color: #ef4444;
+    background: #fee2e2;
 }
 
-#ss-clear:hover { color: #e53e3e; }
+#ss-spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ss-border);
+    border-top-color: var(--ss-accent);
+    border-radius: 50%;
+    animation: ss-spin .6s linear infinite;
+    flex-shrink: 0;
+}
 
 @keyframes ss-spin {
-  to { transform: rotate(360deg); }
+    to { transform: rotate(360deg); }
 }
 
-/* ── Dropdown ────────────────────────────────────────────── */
+/* ── Dropdown ────────────────────────────────────── */
 
 #ss-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: var(--ss-bg);
-  border: 1.5px solid var(--ss-border);
-  border-radius: var(--ss-radius);
-  box-shadow: var(--ss-shadow);
-  z-index: 9999;
-  overflow: hidden;
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 3px);
+    background: var(--ss-bg);
+    border: 1.5px solid var(--ss-border);
+    border-radius: var(--ss-radius);
+    box-shadow: var(--ss-shadow);
+    z-index: 9999;
+    overflow: hidden;
 }
 
 .ss-result {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 13px;
-  cursor: pointer;
-  transition: background .12s;
-  border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--ss-border);
+    transition: background .1s;
+    outline: none;
 }
 
 .ss-result:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .ss-result:hover,
 .ss-result:focus {
-  background: var(--ss-hover);
-  outline: none;
+    background: var(--ss-hover);
 }
 
-.ss-result-icon {
-  font-size: 18px;
-  flex-shrink: 0;
+.ss-r-icon {
+    font-size: 17px;
+    flex-shrink: 0;
 }
 
-.ss-result-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
+.ss-r-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
 }
 
-.ss-result-name {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ss-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.ss-r-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ss-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.ss-result-serial {
-  font-size: 12.5px;
-  color: var(--ss-accent);
-  font-family: 'Fira Mono', 'Consolas', monospace;
+.ss-r-serial {
+    font-size: 12px;
+    color: var(--ss-accent);
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    letter-spacing: .02em;
 }
 
-.ss-result-serial mark {
-  background: var(--ss-mark);
-  border-radius: 2px;
-  padding: 0 1px;
-  color: inherit;
+.ss-r-serial mark {
+    background: var(--ss-mark);
+    border-radius: 2px;
+    padding: 0 1px;
+    color: #78350f;
 }
 
-.ss-result-other {
-  font-size: 11.5px;
-  color: var(--ss-muted);
+.ss-r-inv,
+.ss-r-meta {
+    font-size: 11px;
+    color: var(--ss-muted);
 }
 
-.ss-result-meta {
-  font-size: 11.5px;
-  color: var(--ss-muted);
+.ss-r-type {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--ss-muted);
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 2px 6px;
 }
 
-.ss-result-type {
-  font-size: 11px;
-  color: var(--ss-muted);
-  background: #f1f5f9;
-  border-radius: 4px;
-  padding: 2px 7px;
-  white-space: nowrap;
-  flex-shrink: 0;
+/* ── No result ───────────────────────────────────── */
+
+#ss-noresult {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 7px 12px;
+    background: var(--ss-warn-bg);
+    border: 1.5px solid var(--ss-warn-border);
+    border-radius: var(--ss-radius);
+    font-size: 12.5px;
+    color: #92400e;
 }
 
-.ss-result-edit {
-  color: var(--ss-accent);
-  font-size: 13px;
-  text-decoration: none;
-  flex-shrink: 0;
-  opacity: .7;
-  transition: opacity .15s;
+#ss-create {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--ss-accent);
+    text-decoration: none;
+    white-space: nowrap;
+}
+#ss-create:hover { text-decoration: underline; }
+
+/* ── Selected badge ──────────────────────────────── */
+
+#ss-selected {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    padding: 7px 12px;
+    background: var(--ss-ok-bg);
+    border: 1.5px solid var(--ss-ok-border);
+    border-radius: var(--ss-radius);
+    font-size: 13px;
 }
 
-.ss-result-edit:hover { opacity: 1; }
+.ss-sel-icon { font-size: 15px; }
 
-/* ── No result ───────────────────────────────────────────── */
-
-#ss-no-result {
-  margin-top: 5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: #fff7ed;
-  border: 1.5px solid #fed7aa;
-  border-radius: var(--ss-radius);
-  font-size: 13px;
-  color: #92400e;
+.ss-sel-name {
+    font-weight: 600;
+    color: var(--ss-text);
 }
 
-#ss-create-link {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--ss-accent);
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
+.ss-sel-serial {
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--ss-accent);
+    background: rgba(37,99,235,.08);
+    padding: 1px 5px;
+    border-radius: 3px;
 }
 
-#ss-create-link:hover { text-decoration: underline; }
-
-/* ── Selected badge ──────────────────────────────────────── */
-
-#ss-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  padding: 7px 12px;
-  background: #f0f4fb;
-  border: 1.5px solid #bdd0f7;
-  border-radius: var(--ss-radius);
-  font-size: 13px;
-}
-
-#ss-badge.ss-hidden { display: none; }
-
-.ss-badge-icon { font-size: 16px; }
-
-.ss-badge-name {
-  font-weight: 600;
-  color: var(--ss-text);
-}
-
-.ss-badge-serial {
-  font-family: 'Fira Mono', 'Consolas', monospace;
-  color: var(--ss-accent);
-  font-size: 12.5px;
-}
-
-.ss-badge-link {
-  margin-left: auto;
-  font-size: 12.5px;
-  color: var(--ss-accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.ss-badge-link:hover { text-decoration: underline; }
-
-/* ── Utility ─────────────────────────────────────────────── */
-
-.ss-hidden {
-  display: none !important;
+.ss-sel-type {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ss-muted);
 }

@@ -1,20 +1,18 @@
 <?php
 
 /**
- * Serial Search Plugin for GLPI
- * Adds a quick serial number search bar to ticket forms
+ * Serial Search — GLPI Plugin
+ * Compatible with GLPI 10.x and 11.x
  */
 
-define('PLUGIN_SERIALSEARCH_VERSION', '1.0.0');
+define('PLUGIN_SERIALSEARCH_VERSION', '2.0.0');
 define('PLUGIN_SERIALSEARCH_MIN_GLPI', '10.0.0');
-// define('PLUGIN_SERIALSEARCH_MAX_GLPI', '11.99.99');
-define('SERIALSEARCH_ROOT', Plugin::getWebDir('serialsearch'));
-
+define('PLUGIN_SERIALSEARCH_MAX_GLPI', '11.99.99');
 
 /**
- * Plugin version information
+ * Plugin metadata — required by GLPI
  */
-function plugin_version_serialsearch(): array {
+function plugin_version_serialsearch() {
     return [
         'name'         => 'Serial Search',
         'version'      => PLUGIN_SERIALSEARCH_VERSION,
@@ -24,58 +22,44 @@ function plugin_version_serialsearch(): array {
         'requirements' => [
             'glpi' => [
                 'min' => PLUGIN_SERIALSEARCH_MIN_GLPI,
-                // 'max' => PLUGIN_SERIALSEARCH_MAX_GLPI,
-            ]
-        ]
+                'max' => PLUGIN_SERIALSEARCH_MAX_GLPI,
+            ],
+        ],
     ];
 }
 
 /**
- * Check prerequisites before enabling the plugin
+ * Prerequisites check — required by GLPI
  */
-function plugin_serialsearch_check_prerequisites(): bool {
-    if (version_compare(GLPI_VERSION, PLUGIN_SERIALSEARCH_MIN_GLPI, 'lt')) {
-        echo "This plugin requires GLPI >= " . PLUGIN_SERIALSEARCH_MIN_GLPI;
-        return false;
-    }
+function plugin_serialsearch_check_prerequisites() {
     return true;
 }
 
 /**
- * Check plugin configuration
+ * Config check — required by GLPI
  */
-function plugin_serialsearch_check_config(): bool {
+function plugin_serialsearch_check_config() {
     return true;
 }
 
 /**
- * Register hooks
+ * Plugin init — called by GLPI on every page load.
+ * Note: function name must be plugin_init_PLUGINNAME (not plugin_PLUGINNAME_init).
  */
-function plugin_serialsearch_init(): void {
+function plugin_init_serialsearch() {
     global $PLUGIN_HOOKS;
 
+    // Required for CSRF protection
     $PLUGIN_HOOKS['csrf_compliant']['serialsearch'] = true;
 
-    // Inject JS on every page (will self-activate only on ticket forms)
-    // $PLUGIN_HOOKS['add_javascript']['serialsearch'] = 'plugin_serialsearch_add_javascript';
-    $PLUGIN_HOOKS['add_javascript']['serialsearch'] = ['js/serialsearch.js'];
-
-    // Inject CSS
-    // $PLUGIN_HOOKS['add_css']['serialsearch'] = 'plugin_serialsearch_add_css';
-    $PLUGIN_HOOKS['add_css']['serialsearch'] = ['css/serialsearch.css'];
+    // Only inject our JS/CSS on the ticket creation / edition page
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (
+        strpos($uri, 'ticket.form.php') !== false ||
+        strpos($uri, '/Ticket/') !== false   // GLPI 11 uses clean URLs
+    ) {
+        // In GLPI 10+/11, paths are relative to the plugin's /public directory
+        $PLUGIN_HOOKS['add_javascript']['serialsearch'] = ['js/serialsearch.js'];
+        $PLUGIN_HOOKS['add_css']['serialsearch']        = ['css/serialsearch.css'];
+    }
 }
-
-/**
- * Output the JS include tag
- */
-// function plugin_serialsearch_add_javascript(): void {
-//     echo "<script src='" . SERIALSEARCH_ROOT ."/js/serialsearch.js?v=" . PLUGIN_SERIALSEARCH_VERSION . "'></script>\n";
-// }
-
-/**
- * Output the CSS include tag
- */
-// function plugin_serialsearch_add_css(): void {
-//     echo "<link rel='stylesheet' href='" . SERIALSEARCH_ROOT . "/css/serialsearch.css?v=" . PLUGIN_SERIALSEARCH_VERSION . "'>\n";
-// }
-

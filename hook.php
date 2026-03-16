@@ -1,16 +1,15 @@
 <?php
 
 /**
- * Plugin install hook
- * Nothing to create in DB for this plugin — we only query existing tables.
+ * Install hook — no DB tables needed, we only read existing GLPI tables
  */
-function plugin_serialsearch_install(): bool {
+function plugin_serialsearch_install() {
     return true;
 }
 
 /**
- * Plugin uninstall hook
+ * Uninstall hook
  */
-function plugin_serialsearch_uninstall(): bool {
+function plugin_serialsearch_uninstall() {
     return true;
 }
