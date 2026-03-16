@@ -1,0 +1,264 @@
+/* =====================================================
+   Serial Search Plugin — serialsearch.css
+   Blends with GLPI's default theme (light + dark).
+   ===================================================== */
+
+:root {
+    --ss-accent:   #2563eb;
+    --ss-bg:       #ffffff;
+    --ss-border:   #cbd5e1;
+    --ss-hover:    #eff6ff;
+    --ss-text:     #0f172a;
+    --ss-muted:    #64748b;
+    --ss-mark:     #fde68a;
+    --ss-ok-bg:    #f0fdf4;
+    --ss-ok-border:#86efac;
+    --ss-warn-bg:  #fff7ed;
+    --ss-warn-border:#fdba74;
+    --ss-radius:   8px;
+    --ss-shadow:   0 4px 20px rgba(0,0,0,.10);
+}
+
+/* Dark mode — GLPI 11 uses data-glpi-theme-dark="1" */
+[data-glpi-theme-dark="1"] {
+    --ss-bg:       #1e293b;
+    --ss-border:   #334155;
+    --ss-hover:    #1e3a5f;
+    --ss-text:     #f1f5f9;
+    --ss-muted:    #94a3b8;
+}
+
+/* ── Wrapper ─────────────────────────────────────── */
+
+#ss-wrapper {
+    margin: 8px 0 12px;
+    font-family: inherit;
+}
+
+#ss-bar {
+    position: relative;
+    max-width: 520px;
+}
+
+/* ── Input row ───────────────────────────────────── */
+
+#ss-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: var(--ss-bg);
+    border: 1.5px solid var(--ss-border);
+    border-radius: var(--ss-radius);
+    transition: border-color .15s, box-shadow .15s;
+}
+
+#ss-row:focus-within {
+    border-color: var(--ss-accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+
+#ss-magnifier {
+    font-size: 18px;
+    color: var(--ss-muted);
+    pointer-events: none;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+#ss-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 9px 0;
+    font-size: 13.5px;
+    background: transparent;
+    color: var(--ss-text);
+    font-family: inherit;
+    min-width: 0;
+}
+
+#ss-input::placeholder {
+    color: #a0aec0;
+}
+
+#ss-clear {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ss-muted);
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color .15s, background .15s;
+}
+#ss-clear:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+#ss-spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ss-border);
+    border-top-color: var(--ss-accent);
+    border-radius: 50%;
+    animation: ss-spin .6s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes ss-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Dropdown ────────────────────────────────────── */
+
+#ss-dropdown {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 3px);
+    background: var(--ss-bg);
+    border: 1.5px solid var(--ss-border);
+    border-radius: var(--ss-radius);
+    box-shadow: var(--ss-shadow);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.ss-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--ss-border);
+    transition: background .1s;
+    outline: none;
+}
+
+.ss-result:last-child {
+    border-bottom: none;
+}
+
+.ss-result:hover,
+.ss-result:focus {
+    background: var(--ss-hover);
+}
+
+.ss-r-icon {
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.ss-r-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.ss-r-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ss-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ss-r-serial {
+    font-size: 12px;
+    color: var(--ss-accent);
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    letter-spacing: .02em;
+}
+
+.ss-r-serial mark {
+    background: var(--ss-mark);
+    border-radius: 2px;
+    padding: 0 1px;
+    color: #78350f;
+}
+
+.ss-r-inv,
+.ss-r-meta {
+    font-size: 11px;
+    color: var(--ss-muted);
+}
+
+.ss-r-type {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--ss-muted);
+    background: #f1f5f9;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+/* ── No result ───────────────────────────────────── */
+
+#ss-noresult {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 7px 12px;
+    background: var(--ss-warn-bg);
+    border: 1.5px solid var(--ss-warn-border);
+    border-radius: var(--ss-radius);
+    font-size: 12.5px;
+    color: #92400e;
+}
+
+#ss-create {
+    margin-left: auto;
+    font-weight: 600;
+    color: var(--ss-accent);
+    text-decoration: none;
+    white-space: nowrap;
+}
+#ss-create:hover { text-decoration: underline; }
+
+/* ── Selected badge ──────────────────────────────── */
+
+#ss-selected {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    padding: 7px 12px;
+    background: var(--ss-ok-bg);
+    border: 1.5px solid var(--ss-ok-border);
+    border-radius: var(--ss-radius);
+    font-size: 13px;
+}
+
+.ss-sel-icon { font-size: 15px; }
+
+.ss-sel-name {
+    font-weight: 600;
+    color: var(--ss-text);
+}
+
+.ss-sel-serial {
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--ss-accent);
+    background: rgba(37,99,235,.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.ss-sel-type {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ss-muted);
+}
