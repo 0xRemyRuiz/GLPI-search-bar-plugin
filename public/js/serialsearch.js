@@ -8,7 +8,27 @@
  *  4. On result selection, drive GLPI's native Select2 pickers so the ticket
  *     is saved with the correct item attached.
  */
-console.log('[SS] plugin file loaded');
+
+// Source - https://stackoverflow.com/a/18120786
+// Posted by Johan Dettmar, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-03-18, License - CC BY-SA 4.0
+if (Element.prototype.removeElem == undefined) {
+    Element.prototype.removeElem = function() {
+        this.parentElement.removeChild(this);
+    }
+}
+if (NodeList.prototype.removeElem == undefined) {
+    NodeList.prototype.removeElem = HTMLCollection.prototype.remove = function() {
+        for(var i = this.length - 1; i >= 0; i--) {
+            if(this[i] && this[i].parentElement) {
+                this[i].parentElement.removeChild(this[i]);
+            }
+        }
+    }
+}
+
+// https://glpi-developer-documentation.readthedocs.io/en/master/plugins/index.html
+
 (function () {
     'use strict';
 
@@ -26,6 +46,7 @@ console.log('[SS] plugin file loaded');
 
     let injected = false;
     let debounce  = null;
+    let rand = null;
 
     // ── Selectors for GLPI's native item picker ─────────────────────────────
     // GLPI 10/11 ticket form has:
@@ -35,17 +56,22 @@ console.log('[SS] plugin file loaded');
     // We hide the whole container and insert our bar just above it.
 
     function findItemsContainer() {
-        // GLPI 10 — the items row lives in a specific div
-        const byId = document.getElementById('item_ticket_0');
-        if (byId) return byId;
+        // // GLPI 10 — the items row lives in a specific div
+        // const byId = document.getElementById('item_ticket_0');
+        // if (byId) return byId;
 
-        // GLPI 11 — may use a different wrapper
-        const byClass = document.querySelector('.item_ticket');
-        if (byClass) return byClass;
+        // // GLPI 11 — may use a different wrapper
+        // const byClass = document.querySelector('.item_ticket');
+        // if (byClass) return byClass;
 
         // Fallback: find the itemtype select and return its closest block element
         const sel = document.querySelector('select[name="itemtype"]');
-        if (sel) return sel.closest('tr') || sel.closest('div') || sel.parentNode;
+        if (sel) {
+            let el = sel.closest('tr') || sel.closest('div') || sel.parentNode;
+            el = el.parentNode;
+            rand = el.id.match(/[0-9]+$/)[0];
+            return el;
+        }
 
         return null;
     }
@@ -73,19 +99,21 @@ console.log('[SS] plugin file loaded');
                         type="text"
                         autocomplete="off"
                         spellcheck="false"
-                        placeholder="Type a serial number to find a machine…"
+                        placeholder="Entrez le numéro de série..."
                     />
                     <button id="ss-clear" type="button" title="Clear selection">✕</button>
                     <span id="ss-spinner"></span>
                 </div>
-                <div id="ss-dropdown"></div>
-                <div id="ss-noresult">
-                    No machine found for this serial.
-                    <a id="ss-create" href="#" target="_blank">+ Create new asset</a>
+                <div id="ss-selector-container">
+                    <div id="ss-dropdown"></div>
+                    <div id="ss-noresult">
+                        Pas de résultat...
+                    </div>
                 </div>
                 <div id="ss-selected"></div>
             </div>
         `;
+                        // <a id="ss-create" href="#" target="_blank">+ Create new asset</a>
 
         container.parentNode.insertBefore(wrapper, container);
         bindEvents();
@@ -94,8 +122,8 @@ console.log('[SS] plugin file loaded');
     // ── Events ───────────────────────────────────────────────────────────────
 
     function bindEvents() {
-        const input = get('ss-input');
-        const clear = get('ss-clear');
+        const input = getById('ss-input');
+        const clear = getById('ss-clear');
 
         input.addEventListener('input', () => {
             const val = input.value.trim();
@@ -117,7 +145,7 @@ console.log('[SS] plugin file loaded');
         clear.addEventListener('click', resetSearch);
 
         document.addEventListener('click', e => {
-            if (!get('ss-wrapper')?.contains(e.target)) hideDropdown();
+            if (!getById('ss-wrapper')?.contains(e.target)) hideDropdown();
         });
     }
 
@@ -144,8 +172,8 @@ console.log('[SS] plugin file loaded');
     // ── Render results ───────────────────────────────────────────────────────
 
     function render(items, serial) {
-        const dropdown = get('ss-dropdown');
-        get('ss-noresult').style.display = 'none';
+        const dropdown = getById('ss-dropdown');
+        getById('ss-noresult').style.display = 'none';
         dropdown.innerHTML = '';
 
         if (!items || items.length === 0) {
@@ -154,6 +182,7 @@ console.log('[SS] plugin file loaded');
         }
 
         items.forEach((item, idx) => {
+            // TODO: filter list of each items already added
             const row = document.createElement('div');
             row.className = 'ss-result';
             row.tabIndex  = 0;
@@ -170,8 +199,9 @@ console.log('[SS] plugin file loaded');
                         : ''}
                     ${meta ? `<span class="ss-r-meta">${esc(meta)}</span>` : ''}
                 </span>
-                <span class="ss-r-type">${esc(item.label)}</span>
             `;
+                // <span class="ss-r-type">${esc(item.label)}</span>
+            // i class="ti ti-circle-x pointer"
 
             row.addEventListener('click',   () => select(item));
             row.addEventListener('keydown', e => {
@@ -187,18 +217,94 @@ console.log('[SS] plugin file loaded');
         dropdown.style.display = 'block';
     }
 
+    function buildParams(itemtype, itemsId) {
+        const form = document.querySelector('form[name="massaction_form"]')
+                   || document.querySelector('form[id^="asset_form"]')
+                   || document.querySelector('form');
+
+        const get = (selector) => document.querySelector(selector)?.value ?? '';
+
+        return {
+            id:                    parseInt(getById('input[name="id"]')) || -1,
+            // _users_id_requester:   getById('input[name="_users_id_requester[]"]')
+            //                      || getById('select[name="_users_id_requester[]"]')
+            //                      || '',
+            // items_id:              itemsId ? [itemsId] : [],
+            itemtype:              itemtype,
+            _canupdate:            getById('input[name="_canupdate"]') || '1',
+            entities_id:           parseInt(getById('input[name="entities_id"]')
+                                 || getById('select[name="entities_id"]')) || 0,
+        };
+    }
+
     // ── Select an item ───────────────────────────────────────────────────────
 
     function select(item) {
         hideDropdown();
-        get('ss-input').value = item.serial;
+        getById('ss-input').value = item.serial;
         toggleClear(true);
 
         // Drive GLPI's native pickers so the ticket saves the link correctly
-        setNativePickers(item);
+        // setNativePickers(item);
 
-        // Show confirmation badge
-        showSelected(item);
+        // -DEBUG
+        // showSelected(item);
+        // -DEBUG
+
+        console.log({
+                'action': 'add',
+                'rand': rand,
+                'params': buildParams(item.itemtype, item.id),
+                // 'params': {"id":0,"_users_id_requester":2,"items_id":[],"itemtype":"","_canupdate":4,"entities_id":0},
+                'my_items': $('#dropdown_my_items' + rand).val() || '',
+                'itemtype': item.itemtype,
+                'items_id': item.id,
+            });
+
+        $.ajax({
+            method: 'POST',
+            url: `${GLPI_ROOT}/ajax/item_ticket.php`,
+            dataType: 'html',
+            data: {
+                'action': 'add',
+                'rand': rand,
+                'params': buildParams(item.itemtype, item.id),
+                // 'params': {"id":0,"_users_id_requester":2,"items_id":[],"itemtype":"","_canupdate":4,"entities_id":0},
+                'my_items': $('#dropdown_my_items' + rand).val() || '',
+                'itemtype': item.itemtype,
+                'items_id': item.id,
+            },
+            success: function(response) {
+                // Show confirmation badge
+                showSelected(item);
+            }
+        });
+    }
+
+    function remove(item) {
+        console.log(item);
+        return
+
+        $.ajax({
+            method: 'POST',
+            url: `${GLPI_ROOT}/ajax/item_ticket.php`,
+            dataType: 'html',
+            data: {
+                'action': 'delete',
+                'rand': rand,
+                // 
+                'params': buildParams(item.itemtype, item.id),
+                // 'params': {"id":0,"_users_id_requester":2,"items_id":[],"itemtype":"","_canupdate":4,"entities_id":0},
+                'my_items': $('#dropdown_my_items' + rand).val() || '',
+                'itemtype': item.itemtype,
+                'items_id': item.id,
+            },
+            success: function(response) {
+                // Remove element
+                getById(`#ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
+                // showSelected(item);
+            }
+        });
     }
 
     function setNativePickers(item) {
@@ -253,45 +359,75 @@ console.log('[SS] plugin file loaded');
     }
 
     function showSelected(item) {
-        const el = get('ss-selected');
+        const el = getById('ss-selected');
         el.innerHTML = `
             <span class="ss-sel-icon">${esc(item.icon)}</span>
             <span class="ss-sel-name">${esc(item.name)}</span>
             <code class="ss-sel-serial">${esc(item.serial)}</code>
-            <span class="ss-sel-type">${esc(item.label)}</span>
         `;
+        // el.innerHTML = `
+        //     <span id="ss-inventory-${item.itemtype}-${item.id}-${item.serial}">
+        //         <span class="ss-sel-icon">${esc(item.icon)}</span>
+        //         <span class="ss-sel-name">${esc(item.name)}</span>
+        //         <code class="ss-sel-serial">${esc(item.serial)}</code>
+        //         <button class="ss-clear" type="button" title="Remove">x</button>
+        //     </span>
+        // `;
+        // <span class="ss-sel-type">${esc(item.label)}</span>
         el.style.display = 'flex';
+
+
+        // const container = getById('ss-item-list');
+
+        // const el = document.createElement('span');
+        // el.id = `ss-inventory-${item.itemtype}-${item.id}-${item.serial}`
+        // el.style.display = 'flex';
+        // el.innerHTML = `
+        //     <span class="ss-sel-icon">${esc(item.icon)}</span>
+        //     <span class="ss-sel-name">${esc(item.name)}</span>
+        //     <code class="ss-sel-serial">${esc(item.serial)}</code>
+        // `;
+        // const button = document.createElement('button')
+        // button.class = 'ss-clear'
+        // button.type = 'button'
+        // button.title = 'Remove'
+        // button.innerHTML = `x`
+        // button.addEventListener('click', () => remove(item))
+
+        // el.appendChild(button);
+        // container.appendChild(el);
     }
 
     function showNoResult(serial) {
-        const el = get('ss-noresult');
-        get('ss-create').href = `/glpi/front/computer.form.php?serial=${encodeURIComponent(serial)}`;
+        const el = getById('ss-noresult');
+        // TODO: check creation process and maybe use a modal
+        // getById('ss-create').href = `/glpi/front/computer.form.php?serial=${encodeURIComponent(serial)}`;
         el.style.display = 'flex';
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     function hideDropdown() {
-        const d = get('ss-dropdown');
+        const d = getById('ss-dropdown');
         if (d) d.style.display = 'none';
-        const n = get('ss-noresult');
+        const n = getById('ss-noresult');
         if (n) n.style.display = 'none';
     }
 
     function resetSearch() {
-        get('ss-input').value    = '';
-        get('ss-selected').style.display = 'none';
+        getById('ss-input').value    = '';
+        // getById('ss-selected').style.display = 'none';
         toggleClear(false);
         hideDropdown();
     }
 
     function toggleClear(show) {
-        const btn = get('ss-clear');
+        const btn = getById('ss-clear');
         if (btn) btn.style.display = show ? 'flex' : 'none';
     }
 
     function showSpinner(on) {
-        const s = get('ss-spinner');
+        const s = getById('ss-spinner');
         if (s) s.style.display = on ? 'inline-block' : 'none';
     }
 
@@ -319,7 +455,7 @@ console.log('[SS] plugin file loaded');
         return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    function get(id) {
+    function getById(id) {
         return document.getElementById(id);
     }
 

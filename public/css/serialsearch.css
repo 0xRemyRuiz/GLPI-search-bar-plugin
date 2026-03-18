@@ -82,7 +82,7 @@
     color: #a0aec0;
 }
 
-#ss-clear {
+#ss-clear, .ss-clear {
     display: none;
     align-items: center;
     justify-content: center;
@@ -96,7 +96,7 @@
     flex-shrink: 0;
     transition: color .15s, background .15s;
 }
-#ss-clear:hover {
+#ss-clear:hover, .ss-clear:hover {
     color: #ef4444;
     background: #fee2e2;
 }
@@ -118,18 +118,34 @@
 
 /* ── Dropdown ────────────────────────────────────── */
 
+#ss-selector-container {
+    position: relative;
+    padding-top: 3px;
+}
+
 #ss-dropdown {
     display: none;
     position: absolute;
+    top: 0;
     left: 0;
-    right: 0;
-    top: calc(100% + 3px);
+    /*right: 0;*/
+    width: 100%;
+    /*top: calc(50%);*/
+    /*top: calc(100% + 3px);*/
     background: var(--ss-bg);
     border: 1.5px solid var(--ss-border);
     border-radius: var(--ss-radius);
     box-shadow: var(--ss-shadow);
     z-index: 9999;
     overflow: hidden;
+}
+
+#ss-noresult {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 .ss-result {
@@ -239,6 +255,13 @@
     border: 1.5px solid var(--ss-ok-border);
     border-radius: var(--ss-radius);
     font-size: 13px;
+}
+
+#ss-item-list {
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    padding: 3px 6px;
 }
 
 .ss-sel-icon { font-size: 15px; }

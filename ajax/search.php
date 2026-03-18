@@ -91,8 +91,6 @@ foreach ($asset_tables as $def) {
             }
 
             // Derive the itemtype class name from the table name
-            // glpi_computers -> Computer, glpi_phones -> Phone, etc.
-            $itemtype = $DB->getDefaultPrimaryIDColumn($def['table']) ? '' : '';
             // Use GLPI's own table-to-itemtype mapping
             $itemtype = getItemTypeForTable($def['table']);
 

@@ -5,7 +5,7 @@
  * Compatible with GLPI 10.x and 11.x
  */
 
-define('PLUGIN_SERIALSEARCH_VERSION', '2.0.0');
+define('PLUGIN_SERIALSEARCH_VERSION', '1.0.0');
 define('PLUGIN_SERIALSEARCH_MIN_GLPI', '10.0.0');
 define('PLUGIN_SERIALSEARCH_MAX_GLPI', '11.99.99');
 
@@ -17,7 +17,7 @@ function plugin_version_serialsearch() {
         'name'         => 'Serial Search',
         'version'      => PLUGIN_SERIALSEARCH_VERSION,
         'author'       => 'Repair Shop',
-        'license'      => 'GPL v2+',
+        'license'      => 'MIT',
         'homepage'     => '',
         'requirements' => [
             'glpi' => [
