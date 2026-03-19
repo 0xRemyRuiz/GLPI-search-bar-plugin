@@ -114,23 +114,22 @@ if (NodeList.prototype.removeElem == undefined) {
                 <div id="ss-item-list"></div>
             </div>
         `;
-                        // <a id="ss-create" href="#" target="_blank">+ Create new asset</a>
+            // <a id="ss-create" href="#" target="_blank">+ Create new asset</a>
 
         container.querySelectorAll('input[type="hidden"]').forEach((el, truc) => {
+            const val = parseInt(el.value);
+            if (val === 0) return
             const match = String(el.name).match(/[^\[]+\[([^\]]+)\]\[.+/);
             const item = {
-                id: parseInt(el.value),
+                id: val,
                 itemtype: match[1],
-                serial: null,
             }
             item_list.push(item);
         });
 
         container.parentNode.insertBefore(wrapper, container);
         container.remove();
-        for (var i = item_list.length - 1; i >= 0; i--) {
-            showSelected(item_list[i]);
-        }
+        searchIds();
         bindEvents();
     }
 
@@ -146,11 +145,11 @@ if (NodeList.prototype.removeElem == undefined) {
             hideDropdown();
             clearTimeout(debounce);
             if (val.length < 2) return;
-            debounce = setTimeout(() => search(val), 300);
+            debounce = setTimeout(() => searchSerial(val), 300);
         });
 
         input.addEventListener('keydown', e => {
-            if (e.key === 'Escape') resetSearch();
+            if (e.key === 'Escape') resetSearchSerial();
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 focusResult(0);
@@ -166,7 +165,28 @@ if (NodeList.prototype.removeElem == undefined) {
 
     // ── Search ───────────────────────────────────────────────────────────────
 
-    async function search(serial) {
+    async function searchIds() {
+        for (var i = item_list.length - 1; i >= 0; i--) {
+            try {
+                const res  = await fetch(
+                    `${AJAX_URL}?id=${encodeURIComponent(id)}`,
+                    { credentials: 'same-origin' }
+                );
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                console.log('[SearchIds]', data);
+                item_list[i] = {
+                    ...data[0]
+                }
+                showSelected(data, id);
+            } catch (err) {
+                console.error('[SerialSearch]', err);
+                // showNoResult(id);
+            }
+        }
+    }
+
+    async function searchSerial(serial) {
         showSpinner(true);
         try {
             const res  = await fetch(
@@ -226,7 +246,7 @@ if (NodeList.prototype.removeElem == undefined) {
                 if (e.key === 'Enter')     { select(item); }
                 if (e.key === 'ArrowDown') { e.preventDefault(); focusResult(idx + 1); }
                 if (e.key === 'ArrowUp')   { e.preventDefault(); focusResult(idx - 1); }
-                if (e.key === 'Escape')    { resetSearch(); }
+                if (e.key === 'Escape')    { resetSearchSerial(); }
             });
 
             dropdown.appendChild(row);
@@ -239,7 +259,8 @@ if (NodeList.prototype.removeElem == undefined) {
         let index = item_list.length - 1;
         while (index >= 0) {
             const curr_item = item_list[index];
-            if (curr_item.id === item.id && curr_item.itemtype === item.itemtype) {
+            if (curr_item.id === item.id
+                && (!(item.itemtype) || curr_item.itemtype === item.itemtype) {
                 break;
             }
             index--
@@ -261,6 +282,9 @@ if (NodeList.prototype.removeElem == undefined) {
     function remove(item) {
         const item_found = findItemInList(item);
         if (item_found >= 0) {
+            if (!confirm("Êtes-vous sûr de vouloir supprimer l'élément?")) {
+                return;
+            }
             item_list.splice(item_found, 1);
         }
         getById(`#ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
@@ -278,10 +302,10 @@ if (NodeList.prototype.removeElem == undefined) {
             <code class="ss-sel-serial">${esc(item.serial)}</code>
             <input type="hidden" name="items_id[${item.itemtype}][${item.id}]" value="${item.id}">
         `;
-        const button = document.createElement('span')
-        button.class = 'ss-clear'
+        const button = document.createElement('button')
+        button.className = 'ss-clear'
         button.title = 'Remove'
-        button.innerHTML = `x`
+        button.innerHTML = 'X'
         button.addEventListener('click', () => remove(item))
 
         el.appendChild(button);
@@ -302,7 +326,7 @@ if (NodeList.prototype.removeElem == undefined) {
         if (n) n.style.display = 'none';
     }
 
-    function resetSearch() {
+    function resetSearchSerial() {
         getById('ss-input').value = '';
         toggleClear(false);
         hideDropdown();

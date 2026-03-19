@@ -16,6 +16,7 @@ Session::checkLoginUser();
 header('Content-Type: application/json; charset=utf-8');
 
 $serial = trim($_GET['serial'] ?? '');
+$id = trim($_GET['id'] ?? '');
 
 if (strlen($serial) < 2) {
     echo json_encode([]);
@@ -54,13 +55,22 @@ foreach ($asset_tables as $def) {
     }
 
     try {
+        if ($serial) {
+            $where = [
+                'serial'     => ['LIKE', '%' . $DB->escape($serial) . '%'],
+                'is_deleted' => 0,
+            ];
+        } else {
+            $where = [
+                'id'         => ['=', $DB->escape($id)],
+                'is_deleted' => 0,
+            ];
+        }
+
         $iterator = $DB->request([
             'SELECT' => ['id', 'name', 'serial', 'otherserial', 'locations_id', 'users_id'],
             'FROM'   => $def['table'],
-            'WHERE'  => [
-                'serial'     => ['LIKE', '%' . $DB->escape($serial) . '%'],
-                'is_deleted' => 0,
-            ],
+            'WHERE'  => $where,
             'ORDER'  => ['serial ASC'],
             'LIMIT'  => 10,
         ]);

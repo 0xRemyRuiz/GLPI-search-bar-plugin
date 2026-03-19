@@ -82,8 +82,11 @@
     color: #a0aec0;
 }
 
+#ss-clear {
+    display: none !important;
+}
 #ss-clear, .ss-clear {
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     background: none;
@@ -182,6 +185,9 @@
 }
 
 .ss-r-name {
+    overflow: hidden;
+    display: flex;
+    flex: 0.5;
     font-size: 13px;
     font-weight: 600;
     color: var(--ss-text);
@@ -191,6 +197,9 @@
 }
 
 .ss-r-serial {
+    overflow: hidden;
+    display: flex;
+    flex: 0.5;
     font-size: 12px;
     color: var(--ss-accent);
     font-family: 'Fira Mono', 'Consolas', monospace;
@@ -261,7 +270,11 @@
     align-items: center;
     gap: 8px;
     margin-top: 5px;
-    padding: 3px 6px;
+    padding: 3px 0;
+}
+
+#ss-item-list * {
+    margin: 0 3px;
 }
 
 .ss-sel-icon { font-size: 15px; }
