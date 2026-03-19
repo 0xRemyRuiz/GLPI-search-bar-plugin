@@ -161,7 +161,7 @@ function getById(id) {
             }
         });
 
-        clear.addEventListener('click', resetSearch);
+        clear.addEventListener('click', resetSearchSerial);
 
         document.addEventListener('click', e => {
             if (!getById('ss-wrapper')?.contains(e.target)) hideDropdown();
@@ -292,7 +292,7 @@ function getById(id) {
             }
             item_list.splice(item_found, 1);
         }
-        getById(`#ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
+        getById(`ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
     }
 
     function showSelected(item) {
@@ -311,7 +311,7 @@ function getById(id) {
         button.className = 'ss-clear'
         button.title = 'Remove'
         button.innerHTML = 'X'
-        button.addEventListener('click', () => remove(item))
+        button.addEventListener('click', (e) => {e.preventDefault();remove(item)})
 
         el.appendChild(button);
         container.appendChild(el);

@@ -185,9 +185,6 @@
 }
 
 .ss-r-name {
-    overflow: hidden;
-    display: flex;
-    flex: 0.5;
     font-size: 13px;
     font-weight: 600;
     color: var(--ss-text);
@@ -197,9 +194,6 @@
 }
 
 .ss-r-serial {
-    overflow: hidden;
-    display: flex;
-    flex: 0.5;
     font-size: 12px;
     color: var(--ss-accent);
     font-family: 'Fira Mono', 'Consolas', monospace;
@@ -280,11 +274,17 @@
 .ss-sel-icon { font-size: 15px; }
 
 .ss-sel-name {
+    overflow: hidden;
+    display: flex;
+    flex: 0.5;
     font-weight: 600;
     color: var(--ss-text);
 }
 
 .ss-sel-serial {
+    overflow: hidden;
+    display: flex;
+    flex: 0.5;
     font-family: 'Fira Mono', 'Consolas', monospace;
     font-size: 12px;
     color: var(--ss-accent);
