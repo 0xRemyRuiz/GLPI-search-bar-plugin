@@ -27,6 +27,11 @@ if (NodeList.prototype.removeElem == undefined) {
     }
 }
 
+function getById(id) {
+    return document.getElementById(id);
+}
+
+
 // https://glpi-developer-documentation.readthedocs.io/en/master/plugins/index.html
 
 (function () {
@@ -260,7 +265,7 @@ if (NodeList.prototype.removeElem == undefined) {
         while (index >= 0) {
             const curr_item = item_list[index];
             if (curr_item.id === item.id
-                && (!(item.itemtype) || curr_item.itemtype === item.itemtype) {
+                && (!(item.itemtype) || curr_item.itemtype === item.itemtype)) {
                 break;
             }
             index--
@@ -364,10 +369,6 @@ if (NodeList.prototype.removeElem == undefined) {
 
     function reEscape(s) {
         return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function getById(id) {
-        return document.getElementById(id);
     }
 
     // ── Observer — wait for GLPI's AJAX-rendered form ────────────────────────
