@@ -32,6 +32,15 @@ if (NodeList.prototype.removeElem == undefined) {
 (function () {
     'use strict';
 
+    // -DEBUG
+    (function() {
+        const wrapper_el = getById('ss-wrapper');
+        if (wrapper_el) {
+            wrapper_el.remove();
+        }
+    })();
+    // -DEBUG
+
     const GLPI_ROOT = (typeof CFG_GLPI !== 'undefined' && CFG_GLPI.root_doc !== undefined) ? CFG_GLPI.root_doc : '';
     const AJAX_URL = GLPI_ROOT + '/plugins/serialsearch/ajax/search.php';
     // // Derive AJAX URL from this script's own src
@@ -46,14 +55,7 @@ if (NodeList.prototype.removeElem == undefined) {
 
     let injected = false;
     let debounce  = null;
-    let rand = null;
-
-    // ── Selectors for GLPI's native item picker ─────────────────────────────
-    // GLPI 10/11 ticket form has:
-    //   select[name="itemtype"]  — asset type (Computer, Phone, …)
-    //   select[name="items_id"]  — asset instance (driven by Select2 + AJAX)
-    // Both live inside a <div id="item_ticket_0"> or similar.
-    // We hide the whole container and insert our bar just above it.
+    const item_list = [];
 
     function findItemsContainer() {
         // // GLPI 10 — the items row lives in a specific div
@@ -64,13 +66,12 @@ if (NodeList.prototype.removeElem == undefined) {
         // const byClass = document.querySelector('.item_ticket');
         // if (byClass) return byClass;
 
+        // TODO: clean this!
         // Fallback: find the itemtype select and return its closest block element
         const sel = document.querySelector('select[name="itemtype"]');
         if (sel) {
             let el = sel.closest('tr') || sel.closest('div') || sel.parentNode;
-            el = el.parentNode;
-            rand = el.id.match(/[0-9]+$/)[0];
-            return el;
+            return el.parentNode;
         }
 
         return null;
@@ -85,7 +86,7 @@ if (NodeList.prototype.removeElem == undefined) {
         injected = true;
 
         // Hide the native picker — we'll drive it programmatically on selection
-        container.style.display = 'none';
+        // container.style.display = 'none';
 
         // Build our search bar and insert it just before the hidden native block
         const wrapper = document.createElement('div');
@@ -110,12 +111,26 @@ if (NodeList.prototype.removeElem == undefined) {
                         Pas de résultat...
                     </div>
                 </div>
-                <div id="ss-selected"></div>
+                <div id="ss-item-list"></div>
             </div>
         `;
                         // <a id="ss-create" href="#" target="_blank">+ Create new asset</a>
 
+        container.querySelectorAll('input[type="hidden"]').forEach((el, truc) => {
+            const match = String(el.name).match(/[^\[]+\[([^\]]+)\]\[.+/);
+            const item = {
+                id: parseInt(el.value),
+                itemtype: match[1],
+                serial: null,
+            }
+            item_list.push(item);
+        });
+
         container.parentNode.insertBefore(wrapper, container);
+        container.remove();
+        for (var i = item_list.length - 1; i >= 0; i--) {
+            showSelected(item_list[i]);
+        }
         bindEvents();
     }
 
@@ -182,7 +197,10 @@ if (NodeList.prototype.removeElem == undefined) {
         }
 
         items.forEach((item, idx) => {
-            // TODO: filter list of each items already added
+            if (findItemInList(item) >= 0) {
+                return;
+            }
+
             const row = document.createElement('div');
             row.className = 'ss-result';
             row.tabIndex  = 0;
@@ -217,24 +235,16 @@ if (NodeList.prototype.removeElem == undefined) {
         dropdown.style.display = 'block';
     }
 
-    function buildParams(itemtype, itemsId) {
-        const form = document.querySelector('form[name="massaction_form"]')
-                   || document.querySelector('form[id^="asset_form"]')
-                   || document.querySelector('form');
-
-        const get = (selector) => document.querySelector(selector)?.value ?? '';
-
-        return {
-            id:                    parseInt(getById('input[name="id"]')) || -1,
-            // _users_id_requester:   getById('input[name="_users_id_requester[]"]')
-            //                      || getById('select[name="_users_id_requester[]"]')
-            //                      || '',
-            // items_id:              itemsId ? [itemsId] : [],
-            itemtype:              itemtype,
-            _canupdate:            getById('input[name="_canupdate"]') || '1',
-            entities_id:           parseInt(getById('input[name="entities_id"]')
-                                 || getById('select[name="entities_id"]')) || 0,
-        };
+    function findItemInList(item) {
+        let index = item_list.length - 1;
+        while (index >= 0) {
+            const curr_item = item_list[index];
+            if (curr_item.id === item.id && curr_item.itemtype === item.itemtype) {
+                break;
+            }
+            index--
+        }
+        return index;
     }
 
     // ── Select an item ───────────────────────────────────────────────────────
@@ -244,164 +254,42 @@ if (NodeList.prototype.removeElem == undefined) {
         getById('ss-input').value = item.serial;
         toggleClear(true);
 
-        // Drive GLPI's native pickers so the ticket saves the link correctly
-        // setNativePickers(item);
-
-        // -DEBUG
-        // showSelected(item);
-        // -DEBUG
-
-        console.log({
-                'action': 'add',
-                'rand': rand,
-                'params': buildParams(item.itemtype, item.id),
-                // 'params': {"id":0,"_users_id_requester":2,"items_id":[],"itemtype":"","_canupdate":4,"entities_id":0},
-                'my_items': $('#dropdown_my_items' + rand).val() || '',
-                'itemtype': item.itemtype,
-                'items_id': item.id,
-            });
-
-        $.ajax({
-            method: 'POST',
-            url: `${GLPI_ROOT}/ajax/item_ticket.php`,
-            dataType: 'html',
-            data: {
-                'action': 'add',
-                'rand': rand,
-                'params': buildParams(item.itemtype, item.id),
-                // 'params': {"id":0,"_users_id_requester":2,"items_id":[],"itemtype":"","_canupdate":4,"entities_id":0},
-                'my_items': $('#dropdown_my_items' + rand).val() || '',
-                'itemtype': item.itemtype,
-                'items_id': item.id,
-            },
-            success: function(response) {
-                // Show confirmation badge
-                showSelected(item);
-            }
-        });
+        item_list.push(item);
+        showSelected(item);
     }
 
     function remove(item) {
-        console.log(item);
-        return
-
-        $.ajax({
-            method: 'POST',
-            url: `${GLPI_ROOT}/ajax/item_ticket.php`,
-            dataType: 'html',
-            data: {
-                'action': 'delete',
-                'rand': rand,
-                // 
-                'params': buildParams(item.itemtype, item.id),
-                // 'params': {"id":0,"_users_id_requester":2,"items_id":[],"itemtype":"","_canupdate":4,"entities_id":0},
-                'my_items': $('#dropdown_my_items' + rand).val() || '',
-                'itemtype': item.itemtype,
-                'items_id': item.id,
-            },
-            success: function(response) {
-                // Remove element
-                getById(`#ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
-                // showSelected(item);
-            }
-        });
-    }
-
-    function setNativePickers(item) {
-        const container = findItemsContainer();
-        if (!container) return;
-
-        const $ = window.jQuery;
-
-        // Step 1 — set itemtype select (e.g. "Computer")
-        const typeSelect = container.querySelector('select[name="itemtype"]');
-        if (typeSelect) {
-            typeSelect.value = item.itemtype;
-            // If Select2 is present, sync it
-            if ($ && $(typeSelect).data('select2')) {
-                $(typeSelect).val(item.itemtype).trigger('change');
-            } else {
-                typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+        const item_found = findItemInList(item);
+        if (item_found >= 0) {
+            item_list.splice(item_found, 1);
         }
-
-        // Step 2 — wait a tick for GLPI to re-populate items_id, then set it
-        setTimeout(() => {
-            const itemSelect = container.querySelector('select[name="items_id"]');
-            if (!itemSelect) return;
-
-            if ($ && $(itemSelect).data('select2')) {
-                // Inject the option into Select2 and trigger selection
-                const opt = new Option(
-                    `${item.name} (${item.serial})`,
-                    item.id,
-                    true,
-                    true
-                );
-                $(itemSelect).append(opt).trigger('change');
-            } else {
-                // Plain select fallback
-                let opt = itemSelect.querySelector(`option[value="${item.id}"]`);
-                if (!opt) {
-                    opt = new Option(`${item.name} (${item.serial})`, item.id, true, true);
-                    itemSelect.appendChild(opt);
-                }
-                itemSelect.value = item.id;
-                itemSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            // Step 3 — click GLPI's "Add" button to actually link the item to the ticket
-            const addBtn = container.querySelector('input[type="submit"], button[name="add_item"]')
-                        || container.querySelector('.btn[name="add_item"]');
-            if (addBtn) addBtn.click();
-
-        }, 300);
+        getById(`#ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
     }
 
     function showSelected(item) {
-        const el = getById('ss-selected');
+        const container = getById('ss-item-list');
+
+        const el = document.createElement('span');
+        el.id = `ss-inventory-${item.itemtype}-${item.id}-${item.serial}`
+        el.style.display = 'flex';
         el.innerHTML = `
             <span class="ss-sel-icon">${esc(item.icon)}</span>
             <span class="ss-sel-name">${esc(item.name)}</span>
             <code class="ss-sel-serial">${esc(item.serial)}</code>
+            <input type="hidden" name="items_id[${item.itemtype}][${item.id}]" value="${item.id}">
         `;
-        // el.innerHTML = `
-        //     <span id="ss-inventory-${item.itemtype}-${item.id}-${item.serial}">
-        //         <span class="ss-sel-icon">${esc(item.icon)}</span>
-        //         <span class="ss-sel-name">${esc(item.name)}</span>
-        //         <code class="ss-sel-serial">${esc(item.serial)}</code>
-        //         <button class="ss-clear" type="button" title="Remove">x</button>
-        //     </span>
-        // `;
-        // <span class="ss-sel-type">${esc(item.label)}</span>
-        el.style.display = 'flex';
+        const button = document.createElement('span')
+        button.class = 'ss-clear'
+        button.title = 'Remove'
+        button.innerHTML = `x`
+        button.addEventListener('click', () => remove(item))
 
-
-        // const container = getById('ss-item-list');
-
-        // const el = document.createElement('span');
-        // el.id = `ss-inventory-${item.itemtype}-${item.id}-${item.serial}`
-        // el.style.display = 'flex';
-        // el.innerHTML = `
-        //     <span class="ss-sel-icon">${esc(item.icon)}</span>
-        //     <span class="ss-sel-name">${esc(item.name)}</span>
-        //     <code class="ss-sel-serial">${esc(item.serial)}</code>
-        // `;
-        // const button = document.createElement('button')
-        // button.class = 'ss-clear'
-        // button.type = 'button'
-        // button.title = 'Remove'
-        // button.innerHTML = `x`
-        // button.addEventListener('click', () => remove(item))
-
-        // el.appendChild(button);
-        // container.appendChild(el);
+        el.appendChild(button);
+        container.appendChild(el);
     }
 
     function showNoResult(serial) {
         const el = getById('ss-noresult');
-        // TODO: check creation process and maybe use a modal
-        // getById('ss-create').href = `/glpi/front/computer.form.php?serial=${encodeURIComponent(serial)}`;
         el.style.display = 'flex';
     }
 
@@ -415,8 +303,7 @@ if (NodeList.prototype.removeElem == undefined) {
     }
 
     function resetSearch() {
-        getById('ss-input').value    = '';
-        // getById('ss-selected').style.display = 'none';
+        getById('ss-input').value = '';
         toggleClear(false);
         hideDropdown();
     }
