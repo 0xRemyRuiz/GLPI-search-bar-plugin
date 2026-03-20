@@ -60,6 +60,7 @@ function getById(id) {
     let injected = false;
     let debounce  = null;
     const item_list = [];
+    let rand = null;
     let baseParams;
 
     function findItemsContainer() {
