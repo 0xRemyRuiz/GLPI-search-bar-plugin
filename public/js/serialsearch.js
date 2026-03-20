@@ -31,8 +31,6 @@ function getById(id) {
     return document.getElementById(id);
 }
 
-let test_search;
-
 // https://glpi-developer-documentation.readthedocs.io/en/master/plugins/index.html
 
 (function () {
@@ -124,7 +122,6 @@ let test_search;
 
         container.querySelectorAll('input[type="hidden"]').forEach((el) => {
             const val = parseInt(el.value);
-            console.log('found', el, 'with val=', val);
             if (val === 0) return
             const match = String(el.name).match(/[^\[]+\[([^\]]+)\]\[.+/);
             const item = {
@@ -133,7 +130,6 @@ let test_search;
             }
             item_list.push(item);
         });
-        console.log('final state for item_list', item_list);
 
         container.parentNode.insertBefore(wrapper, container);
         container.remove();
@@ -173,18 +169,16 @@ let test_search;
 
     // ── Search ───────────────────────────────────────────────────────────────
 
-    async function searchIds(id) {
-        console.log(item_list);
+    async function searchIds() {
         for (var i = item_list.length - 1; i >= 0; i--) {
             try {
-                console.log(encodeURIComponent(id));
+                const id = item_list[i];
                 const res  = await fetch(
                     `${AJAX_URL}?id=${encodeURIComponent(id)}`,
                     { credentials: 'same-origin' }
                 );
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                console.log('[SerialSearchIds]', data);
                 item_list[i] = {
                     ...data[0]
                 }
@@ -195,7 +189,6 @@ let test_search;
             }
         }
     }
-    test_search = searchIds;
 
     async function searchSerial(serial) {
         showSpinner(true);

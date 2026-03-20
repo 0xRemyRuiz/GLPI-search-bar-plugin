@@ -18,8 +18,6 @@ header('Content-Type: application/json; charset=utf-8');
 $serial = trim($_GET['serial'] ?? '');
 $id = trim($_GET['id'] ?? '');
 
-echo json_encode([$serial, $id]);
-
 if ($id == '' && strlen($serial) < 2) {
     echo json_encode([]);
     exit;
