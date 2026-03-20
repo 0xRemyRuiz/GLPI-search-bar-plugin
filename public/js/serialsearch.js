@@ -60,6 +60,7 @@ function getById(id) {
     let injected = false;
     let debounce  = null;
     const item_list = [];
+    let baseParams;
 
     function findItemsContainer() {
         // // GLPI 10 — the items row lives in a specific div
@@ -131,6 +132,16 @@ function getById(id) {
             item_list.push(item);
         });
 
+        baseParams = {
+            id:                    parseInt(getById('input[name="id"]')) || -1,
+            _users_id_requester:   getById('input[name="_users_id_requester[]"]')
+                                 || getById('select[name="_users_id_requester[]"]')
+                                 || '',
+            _canupdate:            getById('input[name="_canupdate"]') || '1',
+            entities_id:           parseInt(getById('input[name="entities_id"]')
+                                 || getById('select[name="entities_id"]')) || 0,
+        }
+
         container.parentNode.insertBefore(wrapper, container);
         container.remove();
         searchIds();
@@ -183,6 +194,7 @@ function getById(id) {
                 item_list[i] = {
                     ...data[0]
                 }
+                item_list[i].need_ajax_to_remove = true;
                 showSelected(data[0]);
             } catch (err) {
                 console.error('[SerialSearchIds]', err);
@@ -273,6 +285,15 @@ function getById(id) {
         return index;
     }
 
+    function buildParams(itemsId, itemtype) {
+        const params = {
+            ...baseParams
+        }
+        params.items_id = itemsId ? [itemsId] : [];
+        params.itemtype = itemtype;
+        return params;
+    }
+
     // ── Select an item ───────────────────────────────────────────────────────
 
     function select(item) {
@@ -283,31 +304,46 @@ function getById(id) {
         item_list.push(item);
         showSelected(item);
         getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
-        const empty_element = getById('ss-empty-element-tag');
-        if (empty_element) {
-            empty_element.remove();
-        }
+        // const empty_element = getById('ss-empty-element-tag');
+        // if (empty_element) {
+        //     empty_element.remove();
+        // }
     }
 
     function remove(item) {
+        if (item.need_ajax_to_remove === true) {
+            $.ajax({
+                method: 'POST',
+                url: `${CFG_GLPI.root_doc}/ajax/item_ticket.php`,
+                dataType: 'json',
+                data: {
+                    'action': 'delete',
+                    'rand': rand,
+                    'params': buildParams(item.id, item.itemtype),
+                    'my_items': '0',
+                    'itemtype': itemtype,
+                    'items_id': items_id,
+                }
+            });
+        }
         const item_found = findItemInList(item);
         if (item_found >= 0) {
-            if (!confirm("Êtes-vous sûr de vouloir supprimer l'élément?")) {
+            if (!confirm("Êtes-vous sûr de vouloir supprimer l'élément ?")) {
                 return;
             }
             item_list.splice(item_found, 1);
         }
         getById(`ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
-        getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
-        if (item_list.length === 0) {
-            const empty_input = document.createElement('input');
-            empty_input.id = 'ss-empty-element-tag';
-            empty_input.type = 'hidden';
-            empty_input.name = 'items_id[][]';
-            empty_input.value = '0';
-            const item_list_container = getById('ss-item-list');
-            item_list_container.appendChild(empty_input);
-        }
+        // getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
+        // if (item_list.length === 0) {
+        //     const empty_input = document.createElement('input');
+        //     empty_input.id = 'ss-empty-element-tag';
+        //     empty_input.type = 'hidden';
+        //     empty_input.name = 'items_id[][]';
+        //     empty_input.value = '0';
+        //     const item_list_container = getById('ss-item-list');
+        //     item_list_container.appendChild(empty_input);
+        // }
     }
 
     function showSelected(item) {
