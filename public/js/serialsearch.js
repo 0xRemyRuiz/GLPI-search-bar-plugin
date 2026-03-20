@@ -348,7 +348,7 @@ function getById(id) {
         // }
     }
 
-    function showSelected(item_list)i{
+    function showSelected(item_list) {
         const container = getById('ss-item-list');
 
         const el = document.createElement('span');
