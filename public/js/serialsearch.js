@@ -173,6 +173,7 @@ function getById(id) {
         for (var i = item_list.length - 1; i >= 0; i--) {
             try {
                 const id = item_list[i].id;
+                const itemtype = item_list[i].itemtype;
                 const res  = await fetch(
                     `${AJAX_URL}?id=${id}`,
                     { credentials: 'same-origin' }
@@ -182,7 +183,7 @@ function getById(id) {
                 item_list[i] = {
                     ...data[0]
                 }
-                showSelected(data, id);
+                showSelected(data[0]);
             } catch (err) {
                 console.error('[SerialSearchIds]', err);
                 // showNoResult(id);

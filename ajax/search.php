@@ -17,6 +17,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 $serial = trim($_GET['serial'] ?? '');
 $id = trim($_GET['id'] ?? '');
+$itemtype = trim($_GET['itemtype'] ?? '');
 
 if ($id == '' && strlen($serial) < 2) {
     echo json_encode([]);
@@ -63,6 +64,7 @@ foreach ($asset_tables as $def) {
         } else {
             $where = [
                 'id'         => ['LIKE', $DB->escape($id)],
+                'itemtype'   => ['LIKE', $DB->escape($itemtype)],
                 'is_deleted' => 0,
             ];
         }
