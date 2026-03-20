@@ -172,9 +172,9 @@ function getById(id) {
     async function searchIds() {
         for (var i = item_list.length - 1; i >= 0; i--) {
             try {
-                console.log(item_list[i].id)
+                const id = item_list[i].id;
                 const res  = await fetch(
-                    `${AJAX_URL}?id=${item_list[i].id}`,
+                    `${AJAX_URL}?id=${id}`,
                     { credentials: 'same-origin' }
                 );
                 if (!res.ok) throw new Error('HTTP ' + res.status);
