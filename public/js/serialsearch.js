@@ -172,6 +172,7 @@ function getById(id) {
     async function searchIds() {
         for (var i = item_list.length - 1; i >= 0; i--) {
             try {
+                console.log(item_list[i].id)
                 const res  = await fetch(
                     `${AJAX_URL}?id=${item_list[i].id}`,
                     { credentials: 'same-origin' }
