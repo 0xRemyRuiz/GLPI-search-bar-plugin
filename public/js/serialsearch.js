@@ -136,7 +136,6 @@ function getById(id) {
         });
 
         baseParams = {
-            id:                    parseInt(getById('input[name="id"]')) || -1,
             _users_id_requester:   getById('input[name="_users_id_requester[]"]')
                                  || getById('select[name="_users_id_requester[]"]')
                                  || '',
@@ -292,6 +291,7 @@ function getById(id) {
         const params = {
             ...baseParams
         }
+        params.id = parseInt(window.location.href.match(/id=([0-9]+)/)[1]);
         params.items_id = itemsId ? [itemsId] : [];
         params.itemtype = itemtype;
         return params;
