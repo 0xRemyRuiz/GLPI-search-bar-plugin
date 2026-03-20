@@ -45,12 +45,18 @@ $asset_tables = [
     ['table' => 'glpi_peripherals',       'label' => 'Peripheral','icon' => '🖱️'],
 ];
 
-// GLPI 11 generic/custom assets — only query if the table exists
-if ($DB->tableExists('glpi_assets_assets')) {
-    $asset_tables[] = ['table' => 'glpi_assets_assets', 'label' => 'Asset', 'icon' => '📦'];
+if ($serial) {
+    // GLPI 11 generic/custom assets — only query if the table exists
+    if ($DB->tableExists('glpi_assets_assets')) {
+        $asset_tables[] = ['table' => 'glpi_assets_assets', 'label' => 'Asset', 'icon' => '📦'];
+    }
 }
 
 foreach ($asset_tables as $def) {
+    if ($itemtype && $def['label'] != $itemtype) {
+        continue;
+    }
+
     if (!$DB->tableExists($def['table'])) {
         continue;
     }
@@ -64,7 +70,6 @@ foreach ($asset_tables as $def) {
         } else {
             $where = [
                 'id'         => ['LIKE', $DB->escape($id)],
-                'itemtype'   => ['LIKE', $DB->escape($itemtype)],
                 'is_deleted' => 0,
             ];
         }

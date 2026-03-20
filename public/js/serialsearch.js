@@ -175,7 +175,7 @@ function getById(id) {
                 const id = item_list[i].id;
                 const itemtype = item_list[i].itemtype;
                 const res  = await fetch(
-                    `${AJAX_URL}?id=${id}`,
+                    `${AJAX_URL}?id=${id}&itemtype=${encodeURIComponent(itemtype)}`,
                     { credentials: 'same-origin' }
                 );
                 if (!res.ok) throw new Error('HTTP ' + res.status);
