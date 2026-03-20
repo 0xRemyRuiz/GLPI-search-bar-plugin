@@ -18,7 +18,7 @@ header('Content-Type: application/json; charset=utf-8');
 $serial = trim($_GET['serial'] ?? '');
 $id = trim($_GET['id'] ?? '');
 
-if (strlen($serial) < 2) {
+if ($id == '' && strlen($serial) < 2) {
     echo json_encode([]);
     exit;
 }
@@ -62,7 +62,7 @@ foreach ($asset_tables as $def) {
             ];
         } else {
             $where = [
-                'id'         => ['=', $DB->escape($id)],
+                'id'         => ['LIKE', $DB->escape($id)],
                 'is_deleted' => 0,
             ];
         }
