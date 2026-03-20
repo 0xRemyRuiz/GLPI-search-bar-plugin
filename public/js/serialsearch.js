@@ -76,7 +76,9 @@ function getById(id) {
         const sel = document.querySelector('select[name="itemtype"]');
         if (sel) {
             let el = sel.closest('tr') || sel.closest('div') || sel.parentNode;
-            return el.parentNode;
+            el = el.parentNode;
+            rand = el.id.match(/[0-9]+$/)[0];
+            return el;
         }
 
         return null;
