@@ -325,8 +325,8 @@ function getById(id) {
                     'rand': rand,
                     'params': buildParams(item.id, item.itemtype),
                     'my_items': '0',
-                    'itemtype': itemtype,
-                    'items_id': items_id,
+                    'itemtype': item.itemtype,
+                    'items_id': item.id,
                 }
             });
         }
