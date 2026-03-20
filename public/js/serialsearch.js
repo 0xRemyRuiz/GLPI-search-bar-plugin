@@ -195,7 +195,7 @@ function getById(id) {
                     ...data[0]
                 }
                 item_list[i].need_ajax_to_remove = true;
-                showSelected(data[0]);
+                showSelected(item_list[i]);
             } catch (err) {
                 console.error('[SerialSearchIds]', err);
                 // showNoResult(id);
@@ -304,6 +304,7 @@ function getById(id) {
         item_list.push(item);
         showSelected(item);
         getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
+
         // const empty_element = getById('ss-empty-element-tag');
         // if (empty_element) {
         //     empty_element.remove();
@@ -334,7 +335,8 @@ function getById(id) {
             item_list.splice(item_found, 1);
         }
         getById(`ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
-        // getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
+        getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
+
         // if (item_list.length === 0) {
         //     const empty_input = document.createElement('input');
         //     empty_input.id = 'ss-empty-element-tag';
@@ -346,7 +348,7 @@ function getById(id) {
         // }
     }
 
-    function showSelected(item) {
+    function showSelected(item_list)i{
         const container = getById('ss-item-list');
 
         const el = document.createElement('span');
