@@ -170,7 +170,7 @@ function getById(id) {
 
     // ── Search ───────────────────────────────────────────────────────────────
 
-    async function searchIds() {
+    async function searchIds(id) {
         for (var i = item_list.length - 1; i >= 0; i--) {
             try {
                 const res  = await fetch(
@@ -179,13 +179,13 @@ function getById(id) {
                 );
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                console.log('[SearchIds]', data);
+                console.log('[SerialSearchIds]', data);
                 item_list[i] = {
                     ...data[0]
                 }
                 showSelected(data, id);
             } catch (err) {
-                console.error('[SerialSearch]', err);
+                console.error('[SerialSearchIds]', err);
                 // showNoResult(id);
             }
         }
