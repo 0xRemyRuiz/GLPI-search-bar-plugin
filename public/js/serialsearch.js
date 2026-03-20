@@ -282,6 +282,11 @@ function getById(id) {
 
         item_list.push(item);
         showSelected(item);
+        getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
+        const empty_element = getById('ss-empty-element-tag');
+        if (empty_element) {
+            empty_element.remove();
+        }
     }
 
     function remove(item) {
@@ -293,6 +298,16 @@ function getById(id) {
             item_list.splice(item_found, 1);
         }
         getById(`ss-inventory-${item.itemtype}-${item.id}-${item.serial}`).removeElem();
+        getById('items').parentNode.querySelector('.item-counter.badge').innerHTML = String(item_list.length);
+        if (item_list.length === 0) {
+            const empty_input = document.createElement('input');
+            empty_input.id = 'ss-empty-element-tag';
+            empty_input.type = 'hidden';
+            empty_input.name = 'items_id[][]';
+            empty_input.value = '0';
+            const item_list_container = getById('ss-item-list');
+            item_list_container.appendChild(empty_input);
+        }
     }
 
     function showSelected(item) {
